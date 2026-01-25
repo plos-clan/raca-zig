@@ -8,7 +8,7 @@ pub const struct_TerminalPalette = extern struct {
     ansi_colors: [16]u32 = @import("std").mem.zeroes([16]u32),
 };
 pub const TerminalPalette = struct_TerminalPalette;
-pub extern fn terminal_init(width: usize, height: usize, screen: [*]u8, font_size: f32, malloc: ?*const fn (usize) callconv(.C) ?*anyopaque, free: ?*const fn (?*anyopaque) callconv(.C) void, serial_print: ?*const fn ([*c]const u8) void) bool;
+pub extern fn terminal_init(width: usize, height: usize, screen: [*]u8, font_size: f32, malloc: ?*const fn (usize) callconv(.c) ?*anyopaque, free: ?*const fn (?*anyopaque) callconv(.c) void, serial_print: ?*const fn ([*c]const u8) void) bool;
 pub extern fn terminal_destroy() void;
 pub extern fn terminal_flush() void;
 pub extern fn terminal_set_auto_flush(auto_flush: usize) void;

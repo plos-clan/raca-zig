@@ -1,6 +1,6 @@
 const log = @import("../log.zig");
 const PortIO = @import("../../arch/PortIO.zig");
-const CpuID =@import("../../arch/CpuID.zig");
+const CpuID = @import("../../arch/CpuID.zig");
 const IoApic = @import("./ioapic.zig").IoApic;
 const IOAPIC_ADDR = @import("./ioapic.zig").IOAPIC_ADDR;
 const X2Apic = @import("./lapic.zig").X2Apic;
@@ -17,7 +17,7 @@ pub fn init() void {
     //}else {
     //    Log.printf("CPU supports x2apic!", .{});
     //}
-    
+
     ioapic = IoApic.new(mem.convert_physical_to_virtual(IOAPIC_ADDR));
 
     PortIO.new(0x21).outb(0xff);
@@ -26,7 +26,7 @@ pub fn init() void {
     lapic.init();
 
     const id: u8 = @truncate(lapic.id());
-    
+
     ioapic.disable_all();
 
     ioapic.set_irq_vector(IrqVecotr.IRQ_KBD, InterruptIndex.INT_KBD);

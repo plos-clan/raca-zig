@@ -30,7 +30,7 @@ pub const SerialPort = struct {
     }
 };
 
-fn serial_print (str: [*c]const u8) void {
+fn serial_print(str: [*c]const u8) void {
     const len = @import("std").mem.len(str);
     for (str[0..len]) |c| {
         global_serial.putchar(c);
@@ -39,10 +39,10 @@ fn serial_print (str: [*c]const u8) void {
 
 pub fn init() void {
     global_serial = SerialPort.new(0x3f8);
-    
+
     const framebuffer = framebuffer_request.response.?.framebuffers()[0];
 
-    _ = ost.terminal_init(framebuffer.width, framebuffer.height, framebuffer.address,  16.0, &alloc.malloc, &alloc.free, &serial_print);
+    _ = ost.terminal_init(framebuffer.width, framebuffer.height, framebuffer.address, 16.0, &alloc.malloc, &alloc.free, &serial_print);
 
     ost.terminal_set_color_scheme(8);
 }

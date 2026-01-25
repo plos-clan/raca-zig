@@ -62,7 +62,7 @@ const Entry = extern struct {
     }
 
     /// Sets the interrupt handler for this interrupt.
-    pub fn set_handler(self: *Self, handler: *const fn () callconv(.Naked) void) void {
+    pub fn set_handler(self: *Self, handler: *const fn () callconv(.naked) void) void {
         const address = @intFromPtr(handler);
         self.pointer_low = @truncate(address);
         self.pointer_middle = @truncate(address >> 16);
@@ -75,7 +75,7 @@ const Entry = extern struct {
     }
 };
 
-fn generate_handle(comptime num: u8) fn () callconv(.Naked) void {
+fn generate_handle(comptime num: u8) fn () callconv(.naked) void {
     const error_code_list = [_]u8{ 8, 10, 11, 12, 13, 14, 17, 21, 29, 30 };
 
     const public = std.fmt.comptimePrint(
@@ -108,8 +108,8 @@ fn generate_handle(comptime num: u8) fn () callconv(.Naked) void {
         \\     push $0b10000000000000000
         \\
         // Note: the Line breaks are very important
-            ++
-            public;
+    ++
+        public;
     const restore_status =
         \\     pop %%r15
         \\     pop %%r14
@@ -130,10 +130,10 @@ fn generate_handle(comptime num: u8) fn () callconv(.Naked) void {
         \\     iretq
     ;
     return struct {
-        fn handle() callconv(.Naked) void {
-            asm volatile (save_status ::: "memory");
+        fn handle() callconv(.naked) void {
+            asm volatile (save_status ::: .{ .memory = true });
             asm volatile ("call interrupt_handler");
-            asm volatile (restore_status ::: "memory");
+            asm volatile (restore_status ::: .{ .memory = true });
         }
     }.handle;
 }
@@ -174,10 +174,9 @@ pub const InterruptDescriptorTable = struct {
             .limit = @sizeOf(Self) - 1,
         };
 
-        asm volatile (
-            \\  lidt (%[idtr_address])
+        asm volatile ("lidt (%[idtr_address])"
             :
-            : [idtr_address] "r" (&idtr),
+            : [idtr_address] "{rax}" (&idtr),
         );
     }
 };

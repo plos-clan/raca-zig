@@ -1,3 +1,6 @@
+const std = @import("std");
+const mem = std.mem;
+
 pub const IoApic = struct {
     reg: u64,
     data: u64,
@@ -19,14 +22,14 @@ pub const IoApic = struct {
 
     // 被优化逼得没办法，故此用内联汇编读写内存
     fn read(self: *Self, reg: u8) u32 {
-        asm volatile ("movl %%eax,(%%rbx)"::[addr]"{rbx}"(self.reg),[reg]"{rax}"(reg));
-        return asm volatile ("mov (%%rbx),%%rax":[ret]"={rax}"(->u32):[addr]"{rbx}"(self.data));
+        mem.writeInt(u8, @ptrFromInt(self.reg), reg, .little);
+        return mem.readInt(u32, @ptrFromInt(self.data), .little);
     }
 
     // 被优化逼得没办法，故此用内联汇编读写内存
     fn write(self: *Self, reg: u8, data: u32) void {
-        asm volatile ("movl %%eax,(%%rbx)"::[addr]"{rbx}"(self.reg),[reg]"{rax}"(reg));
-        asm volatile ("movl %%eax,(%%rbx)"::[addr]"{rbx}"(self.data),[data]"{rax}"(data));
+        mem.writeInt(u8, @ptrFromInt(self.reg), reg, .little);
+        mem.writeInt(u32, @ptrFromInt(self.data), data, .little);
     }
 
     fn write_irq(self: *Self, irq: u8, vector: u8, flags: u32, dest: u8) void {

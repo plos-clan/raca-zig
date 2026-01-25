@@ -13,21 +13,22 @@ const RacaAllocator = struct {
         }
         return .{};
     }
-    
+
     const vtable: std.mem.Allocator.VTable = .{
         .alloc = &allocate_memory,
         .resize = &resize,
         .free = &free_memory,
+        .remap = remap,
     };
-    
+
     pub fn allocator(self: *const RacaAllocator) std.mem.Allocator {
         return .{
             .ptr = @constCast(self),
             .vtable = &vtable,
         };
     }
-    
-    fn allocate_memory(ctx: *anyopaque, len: usize, ptr_align: u8, ret_addr: usize) ?[*]u8 {
+
+    fn allocate_memory(ctx: *anyopaque, len: usize, ptr_align: std.mem.Alignment, ret_addr: usize) ?[*]u8 {
         _ = ret_addr;
         _ = ctx;
         _ = ptr_align;
@@ -36,8 +37,8 @@ const RacaAllocator = struct {
         const ptr3: *[1]u8 = ptr2;
         return ptr3;
     }
-    
-    fn resize(ctx: *anyopaque, buf: []u8, buf_align: u8, new_len: usize, ret_addr: usize) bool {
+
+    fn resize(ctx: *anyopaque, buf: []u8, buf_align: std.mem.Alignment, new_len: usize, ret_addr: usize) bool {
         _ = ret_addr;
         _ = ctx;
         _ = buf_align;
@@ -45,12 +46,21 @@ const RacaAllocator = struct {
         _ = new_len;
         return false;
     }
-    
-    fn free_memory(ctx: *anyopaque, buf: []u8, buf_align: u8, ret_addr: usize) void {
+
+    fn free_memory(ctx: *anyopaque, buf: []u8, buf_align: std.mem.Alignment, ret_addr: usize) void {
         _ = ret_addr;
         _ = ctx;
         _ = buf_align;
         alloc.free(@ptrCast(buf));
+    }
+
+    fn remap(ctx: *anyopaque, buf: []u8, buf_align: std.mem.Alignment, new_addr: usize, ret_addr: usize) ?[*]u8 {
+        _ = ret_addr;
+        _ = ctx;
+        _ = buf_align;
+        _ = new_addr;
+        _ = buf;
+        return null;
     }
 };
 

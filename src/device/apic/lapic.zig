@@ -54,7 +54,7 @@ pub const X2Apic = struct {
 
     pub fn enable_lvt(self: *Self, index: LVTIndex) void {
         const value = self.read_lvt(index);
-        self.write_lvt(index, (value & (~@as(u32,1 << 16))));
+        self.write_lvt(index, (value & (~@as(u32, 1 << 16))));
     }
 
     pub fn eoi(self: *Self) void {
@@ -71,7 +71,7 @@ pub const X2Apic = struct {
         self.ap_init();
 
         for (@intFromEnum(LVTIndex.Timer)..@intFromEnum(LVTIndex.Error)) |lvt| {
-            self.write_lvt(@enumFromInt(lvt),0x10000);
+            self.write_lvt(@enumFromInt(lvt), 0x10000);
         }
 
         self.write(0xf0, 0x1ff);

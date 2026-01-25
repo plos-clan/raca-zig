@@ -40,18 +40,18 @@ const InterruptStack = packed struct {
         const ty_info = @typeInfo(ty);
 
         switch (ty_info) {
-            .Struct => |info| {
-                print("InterruptStack {{\n",.{});
+            .@"struct" => |info| {
+                print("InterruptStack {{\n", .{});
                 inline for (info.fields, 0..) |f, i| {
                     if (i == 0) {
-                        print("    .",.{});
+                        print("    .", .{});
                     } else {
-                        print(",\n    .",.{});
+                        print(",\n    .", .{});
                     }
-                    print("{s}",.{f.name});
-                    print(" = 0x{x}",.{@field(self.*, f.name)});
+                    print("{s}", .{f.name});
+                    print(" = 0x{x}", .{@field(self.*, f.name)});
                 }
-                print("\n}}\n",.{});
+                print("\n}}\n", .{});
             },
             else => {
                 @panic("error at show stack!");
@@ -126,7 +126,7 @@ pub export fn interrupt_handler(stack: *InterruptStack) void {
         10 => invalid_tss(stack),
         13 => general_protection(stack),
         14 => page_fault(stack),
-        else => {}
+        else => {},
     }
 
     eoi();
@@ -135,7 +135,7 @@ pub export fn interrupt_handler(stack: *InterruptStack) void {
         InterruptIndex.INT_TIMER => timer(stack),
         InterruptIndex.INT_KBD => keyboard(stack),
         InterruptIndex.INT_MOUSE => mouse(stack),
-        else => {}
+        else => {},
     }
 }
 

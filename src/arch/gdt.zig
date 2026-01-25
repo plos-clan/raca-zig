@@ -101,9 +101,9 @@ pub const GlobalDescriptorTalbe = extern struct {
 
         // Load the GDT
         asm volatile (
-            \\  lgdt %[p]
+            \\  lgdt (%[p])
             :
-            : [p] "*p" (&gdt_ptr),
+            : [p] "{rax}" (&gdt_ptr),
         );
 
         // Use the data selectors
@@ -126,8 +126,7 @@ pub const GlobalDescriptorTalbe = extern struct {
             \\ 1:
             :
             : [csel] "i" (kernel_code_selector),
-            : "rax"
-        );
+            : .{ .rax = true });
     }
 
     const GDTR = packed struct {
@@ -139,15 +138,14 @@ pub const GlobalDescriptorTalbe = extern struct {
 var GDT: GlobalDescriptorTalbe = GlobalDescriptorTalbe.new();
 var TSS: TaskStateSegment = TaskStateSegment.new();
 
-const tss_stack_size = 4*1024;
+const tss_stack_size = 4 * 1024;
 var tss_stack: [tss_stack_size]u8 = [_]u8{0} ** tss_stack_size;
 
 pub fn init() void {
     const stack_start = @intFromPtr(&tss_stack);
     const stack_end = stack_start + tss_stack_size;
 
-    TSS.set_interrupt_stack(0,stack_end);
+    TSS.set_interrupt_stack(0, stack_end);
     GDT.load();
     GDT.set_tss(&TSS);
 }
-

@@ -23,17 +23,16 @@ pub fn init() void {
         const response = hhdm.response.?;
         physical_offset = @intCast(response.offset);
     }
-    
+
     const response = mem_map_request.response.?;
-    
+
     for (response.entries()) |entry| {
-        if (entry.length >= 1*1024*1024 and entry.kind == .usable and entry.base != 0) {
+        if (entry.length >= 1 * 1024 * 1024 and entry.kind == .usable and entry.base != 0) {
             const virtual = convert_physical_to_virtual(entry.base);
             alloc.init(@ptrFromInt(virtual), entry.length);
             break;
         }
     }
-    
+
     allocator = alloc.raca_allocator.allocator();
-    
 }

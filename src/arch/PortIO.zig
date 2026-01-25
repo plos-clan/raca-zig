@@ -17,12 +17,13 @@ pub fn offset(self: *const Self, off: u16) Self {
 }
 
 /// Input bytes
-pub fn inb(self: *const Self,) u8 {
+pub fn inb(
+    self: *const Self,
+) u8 {
     return asm volatile ("inb %[port], %[ret]"
         : [ret] "={al}" (-> u8),
         : [port] "{dx}" (self.port),
-        : "dx", "al"
-    );
+        : .{ .dx = true, .al = true });
 }
 
 /// Input two bytes
@@ -30,8 +31,7 @@ pub fn inw(self: *const Self) u16 {
     return asm volatile ("inw %[port], %[ret]"
         : [ret] "={ax}" (-> u16),
         : [port] "{dx}" (self.port),
-        : "dx", "al"
-    );
+        : .{ .dx = true, .al = true });
 }
 
 /// Output bytes
@@ -40,8 +40,5 @@ pub fn outb(self: *const Self, val: u8) void {
         :
         : [val] "{al}" (val),
           [port] "{dx}" (self.port),
-        : "dx", "al"
-    );
+        : .{ .dx = true, .al = true });
 }
-
-

@@ -22,35 +22,32 @@ inline fn done() noreturn {
     }
 }
 
-pub const std_options = .{
-    // Set the log level to info
+pub const std_options: std.Options = .{
     .log_level = .debug,
-
-    // Define logFn to override the std implementation
     .logFn = log.raca_log,
 };
 
 // The following will be our kernel's entry point.
-export fn _start() callconv(.C) noreturn {
+export fn _start() callconv(.c) noreturn {
     // Ensure the bootloader actually understands our base revision (see spec).
     if (!base_revision.is_supported()) {
         done();
     }
-    
+
     mem.init();
-    
+
     terminal.init();
-    
+
     arch.init();
-    
+
     apic.init();
-    
+
     //asm volatile ("int $0");
-    
+
     std.log.debug("Hello, world!", .{});
 
     asm volatile ("sti");
-    
+
     // We're done, just hang...
     done();
 }
@@ -58,22 +55,22 @@ export fn _start() callconv(.C) noreturn {
 var already_panicking: bool = false;
 
 /// Handle kernel panics
-pub fn panic(msg: []const u8,stack_trace: ?*std.builtin.StackTrace, return_address: ?usize) noreturn {
+pub fn panic(msg: []const u8, stack_trace: ?*std.builtin.StackTrace, return_address: ?usize) noreturn {
     // put out things
     // only print things if not panicking while panic
     if (!already_panicking) {
         already_panicking = true;
-        std.log.err("\n !!! Kernel Panic !!! ",.{});
+        std.log.err("\n !!! Kernel Panic !!! ", .{});
         std.log.err(" !!! Message: {s}", .{msg});
         if (stack_trace) |trace| {
             // if stack trace is delivered, we can loop over it
-            std.log.info(" Stack Trace: ",.{});
+            std.log.info(" Stack Trace: ", .{});
             for (trace.*.instruction_addresses) |address| {
                 print.println(" 0x{x:0>16}", .{address});
             }
         } else {
             // else, we will have to capture it via std.debug.StackIterator
-            std.log.info("  Stack Trace: ",.{});
+            std.log.info("  Stack Trace: ", .{});
             var stack = std.debug.StackIterator.init(return_address orelse @returnAddress(), null);
             while (stack.next()) |address| {
                 print.println(" 0x{x:0>16}", .{address});
@@ -82,6 +79,3 @@ pub fn panic(msg: []const u8,stack_trace: ?*std.builtin.StackTrace, return_addre
     }
     done();
 }
-
-
-

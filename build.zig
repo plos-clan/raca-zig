@@ -25,34 +25,41 @@ pub fn build(b: *std.Build) void {
     const optimize = b.standardOptimizeOption(.{});
 
     const kernel = b.addExecutable(.{
-        .name = "racaOS",
-        .root_source_file = b.path("src/main.zig"),
-        .target = target,
-        .optimize = optimize,
-        .code_model = .kernel,
+        .name = "raca",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("src/main.zig"),
+            .target = target,
+            .optimize = optimize,
+            .code_model = .kernel,
+            .unwind_tables = .sync,
+            .red_zone = false,
+            .link_libc = false,
+            .stack_check = false,
+            .stack_protector = false,
+            .link_libcpp = false,
+        }),
+        .use_llvm = true,
     });
-    
+
     kernel.addLibraryPath(b.path("lib"));
     kernel.linkSystemLibrary("alloc");
     kernel.linkSystemLibrary("os_terminal");
 
     kernel.setLinkerScript(b.path("linker.ld"));
+    kernel.lto = .none;
 
-    kernel.want_lto = false;
-
-    // This declares intent for the executable to be installed into the
-    // standard location when the user invokes the "install" step (the default
-    // step when running `zig build`).
     b.installArtifact(kernel);
 
     const launcher = b.addExecutable(.{
-        .name = "racaOS-launcher",
-        .root_source_file = b.path("launcher/main.zig"),
-        .target = launcher_target,
-        .optimize = optimize,
+        .name = "raca-launcher",
+        .root_module = b.createModule(.{
+            .root_source_file = b.path("launcher/main.zig"),
+            .target = launcher_target,
+            .optimize = optimize,
+        }),
     });
 
-    var launcher_install = b.addInstallArtifact(launcher,.{});
+    var launcher_install = b.addInstallArtifact(launcher, .{});
     launcher_install.step.dependOn(b.getInstallStep());
 
     const run_launcher = b.addRunArtifact(launcher);
