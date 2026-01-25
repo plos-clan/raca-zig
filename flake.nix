@@ -20,6 +20,7 @@
             qemu
             zig
             zls
+            tokei
           ];
 
           # https://github.com/rust-lang/rust-bindgen#environment-variables

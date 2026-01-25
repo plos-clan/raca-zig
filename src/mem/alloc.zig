@@ -1,9 +1,18 @@
 const std = @import("std");
 
+const HeapError = enum(c_int) {
+    InvalidFree = 0,
+    LayoutError = 1,
+};
+
+const ErrorHandler = ?*const fn (err: HeapError, ptr: ?*anyopaque) callconv(.c) void;
+
 pub const alloc = struct {
     pub extern fn heap_init(ptr: *const u8, size: usize) bool;
     pub extern fn malloc(size: usize) ?*anyopaque;
+    pub extern fn aligned_alloc(alignment: usize, size: usize) ?*anyopaque;
     pub extern fn free(ptr: ?*anyopaque) void;
+    pub extern fn heap_onerror(err_handler: ErrorHandler) void;
 };
 
 const RacaAllocator = struct {
@@ -11,7 +20,16 @@ const RacaAllocator = struct {
         if (!alloc.heap_init(ptr, size)) {
             @panic("Failed to initialize heap");
         }
+        alloc.heap_onerror(error_handler);
         return .{};
+    }
+
+    fn error_handler(err: HeapError, ptr: ?*anyopaque) callconv(.c) void {
+        std.log.debug("Error at 0x{x:0>16}", .{@intFromPtr(ptr)});
+        switch (err) {
+            HeapError.InvalidFree => @panic("Invalid free"),
+            HeapError.LayoutError => @panic("Layout error"),
+        }
     }
 
     const vtable: std.mem.Allocator.VTable = .{
@@ -31,8 +49,7 @@ const RacaAllocator = struct {
     fn allocate_memory(ctx: *anyopaque, len: usize, ptr_align: std.mem.Alignment, ret_addr: usize) ?[*]u8 {
         _ = ret_addr;
         _ = ctx;
-        _ = ptr_align;
-        const ptr = alloc.malloc(len) orelse return null;
+        const ptr = alloc.aligned_alloc(@intFromEnum(ptr_align), len) orelse return null;
         const ptr2: *u8 = @ptrCast(ptr);
         const ptr3: *[1]u8 = ptr2;
         return ptr3;
