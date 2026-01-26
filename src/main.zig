@@ -1,5 +1,5 @@
 const builtin = @import("builtin");
-const limine = @import("boot.zig").limine;
+const limine = @import("boot/limine.zig");
 const log = @import("log.zig");
 const std = @import("std");
 
@@ -26,9 +26,8 @@ export fn _start() callconv(.c) noreturn {
         done();
     }
 
-    mem.init();
-
     log.init();
+    mem.init();
 
     std.log.debug("Hello, world!", .{});
 
@@ -37,22 +36,17 @@ export fn _start() callconv(.c) noreturn {
 
 var already_panicking: bool = false;
 
-/// Handle kernel panics
 pub fn panic(msg: []const u8, stack_trace: ?*std.builtin.StackTrace, return_address: ?usize) noreturn {
-    // put out things
-    // only print things if not panicking while panic
     if (!already_panicking) {
         already_panicking = true;
         std.log.err("\n !!! Kernel Panic !!! ", .{});
         std.log.err(" !!! Message: {s}", .{msg});
         if (stack_trace) |trace| {
-            // if stack trace is delivered, we can loop over it
             std.log.info(" Stack Trace: ", .{});
             for (trace.*.instruction_addresses) |address| {
                 log.println(" 0x{x:0>16}", .{address});
             }
         } else {
-            // else, we will have to capture it via std.debug.StackIterator
             std.log.info("  Stack Trace: ", .{});
             var stack = std.debug.StackIterator.init(return_address orelse @returnAddress(), null);
             while (stack.next()) |address| {

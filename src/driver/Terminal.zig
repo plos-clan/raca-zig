@@ -6,7 +6,7 @@ buffer: Buffer,
 
 const font_data = @embedFile("terminal/VGA8.F16");
 
-pub fn new(buffer: Buffer, font: Font) @This() {
+pub fn init(buffer: Buffer, font: Font) @This() {
     return .{
         .buffer = buffer,
         .font = font,
@@ -95,7 +95,7 @@ pub const Buffer = struct {
     width: u64,
     height: u64,
 
-    pub fn new(
+    pub fn init(
         ptr: [*]volatile u32,
         width: u64,
         height: u64,
@@ -125,7 +125,7 @@ pub const Font = struct {
     height: u64,
     data: [*]const u8,
 
-    pub fn new(width: u64, height: u64, data: [*]const u8) Font {
+    pub fn init(width: u64, height: u64, data: [*]const u8) Font {
         return Font{
             .width = width,
             .height = height,

@@ -8,7 +8,7 @@ var terminal: Terminal = undefined;
 pub fn init() void {
     const framebuffer = framebuffer_request.response.?.framebuffers_ptr[0];
     const ptr: [*]volatile u32 = @ptrCast(@alignCast(framebuffer.address));
-    terminal = Terminal.new(Terminal.Buffer.new(ptr, framebuffer.width, framebuffer.height), Terminal.Font.default());
+    terminal = Terminal.init(Terminal.Buffer.init(ptr, framebuffer.width, framebuffer.height), Terminal.Font.default());
 }
 
 pub fn raca_log(
