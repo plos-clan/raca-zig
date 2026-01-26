@@ -1,7 +1,7 @@
-/* Tell the linker that we want an x86_64 ELF64 output file */
-OUTPUT_FORMAT(elf64-x86-64)
+/* Tell the linker that we want a loongarch64 ELF64 output file */
+OUTPUT_FORMAT(elf64-loongarch)
 
-/* We want the symbol _start to be our entry point */
+/* We want the symbol kmain to be our entry point */
 ENTRY(_start)
 
 /* Define the program headers we want so the bootloader gives us the right */
@@ -9,9 +9,10 @@ ENTRY(_start)
 /* process. */
 PHDRS
 {
-    text    PT_LOAD;
-    rodata  PT_LOAD;
-    data    PT_LOAD;
+    limine_requests PT_LOAD;
+    text PT_LOAD;
+    rodata PT_LOAD;
+    data PT_LOAD;
 }
 
 SECTIONS
@@ -21,6 +22,16 @@ SECTIONS
     /* Any address in this region will do, but often 0xffffffff80000000 is chosen as */
     /* that is the beginning of the region. */
     . = 0xffffffff80000000;
+
+    /* Define a section to contain the Limine requests and assign it to its own PHDR */
+    .limine_requests : {
+        KEEP(*(.limine_requests_start))
+        KEEP(*(.limine_requests))
+        KEEP(*(.limine_requests_end))
+    } :limine_requests
+
+    /* Move to the next memory page for .text */
+    . = ALIGN(CONSTANT(MAXPAGESIZE));
 
     .text : {
         *(.text .text.*)
@@ -33,17 +44,17 @@ SECTIONS
         *(.rodata .rodata.*)
     } :rodata
 
+    /* Add a .note.gnu.build-id output section in case a build ID flag is added to the */
+    /* linker command. */
+    .note.gnu.build-id : {
+        *(.note.gnu.build-id)
+    } :rodata
+
     /* Move to the next memory page for .data */
     . = ALIGN(CONSTANT(MAXPAGESIZE));
 
     .data : {
         *(.data .data.*)
-
-        /* Place the sections that contain the Limine requests as part of the .data */
-        /* output section. */
-        KEEP(*(.requests_start_marker))
-        KEEP(*(.requests))
-        KEEP(*(.requests_end_marker))
     } :data
 
     /* NOTE: .bss needs to be the last thing mapped to :data, otherwise lots of */

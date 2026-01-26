@@ -3,20 +3,16 @@ const limine = @import("boot.zig").limine;
 const terminal = @import("device/terminal.zig");
 const log = @import("device/log.zig");
 const std = @import("std");
-const arch = @import("arch.zig");
 const print = @import("print.zig");
-const apic = @import("device/apic/apic.zig");
 
 pub const mem = @import("mem.zig");
 
-pub export var base_revision: limine.BaseRevision = .{ .revision = 2 };
+pub export var base_revision: limine.BaseRevision = .{ .revision = 4 };
 
 inline fn done() noreturn {
     while (true) {
         switch (builtin.cpu.arch) {
-            .x86_64 => asm volatile ("hlt"),
-            .aarch64 => asm volatile ("wfi"),
-            .riscv64 => asm volatile ("wfi"),
+            .loongarch64 => asm volatile ("idle 0"),
             else => unreachable,
         }
     }
@@ -27,9 +23,7 @@ pub const std_options: std.Options = .{
     .logFn = log.raca_log,
 };
 
-// The following will be our kernel's entry point.
 export fn _start() callconv(.c) noreturn {
-    // Ensure the bootloader actually understands our base revision (see spec).
     if (!base_revision.is_supported()) {
         done();
     }
@@ -38,17 +32,8 @@ export fn _start() callconv(.c) noreturn {
 
     terminal.init();
 
-    arch.init();
-
-    apic.init();
-
-    //asm volatile ("int $0");
-
     std.log.debug("Hello, world!", .{});
 
-    asm volatile ("sti");
-
-    // We're done, just hang...
     done();
 }
 

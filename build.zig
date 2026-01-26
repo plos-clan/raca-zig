@@ -1,50 +1,47 @@
 const std = @import("std");
+const Feature = @import("std").Target.loongarch.Feature;
 
 // Although this function looks imperative, note that its job is to
 // declaratively construct a build graph that will be executed by an external
 // runner.
 pub fn build(b: *std.Build) void {
     const launcher_target = b.standardTargetOptions(.{});
+    const la64_cpu = @import("std").Target.loongarch.cpu.generic_la64;
 
-    var target_query: std.Target.Query = .{
-        .cpu_arch = .x86_64,
+    const target_query: std.Target.Query = .{
+        .cpu_arch = .loongarch64,
         .os_tag = .freestanding,
-        .abi = .none,
+        .abi = .muslsf,
+        .cpu_model = .{ .explicit = &la64_cpu },
     };
-
-    const Feature = std.Target.x86.Feature;
-
-    target_query.cpu_features_add.addFeature(@intFromEnum(Feature.soft_float));
-    target_query.cpu_features_sub.addFeature(@intFromEnum(Feature.mmx));
-    target_query.cpu_features_sub.addFeature(@intFromEnum(Feature.sse));
-    target_query.cpu_features_sub.addFeature(@intFromEnum(Feature.sse2));
-    target_query.cpu_features_sub.addFeature(@intFromEnum(Feature.avx));
-    target_query.cpu_features_sub.addFeature(@intFromEnum(Feature.avx2));
-
     const target = b.resolveTargetQuery(target_query);
+
     const optimize = b.standardOptimizeOption(.{});
+
+    const kernel_module = b.createModule(.{
+        .root_source_file = b.path("src/main.zig"),
+        .target = target,
+        .optimize = optimize,
+        .code_model = .medium,
+        .unwind_tables = .sync,
+        .red_zone = false,
+        .link_libc = false,
+        .stack_check = false,
+        .stack_protector = false,
+        .link_libcpp = false,
+        .pic = false,
+    });
 
     const kernel = b.addExecutable(.{
         .name = "raca",
-        .root_module = b.createModule(.{
-            .root_source_file = b.path("src/main.zig"),
-            .target = target,
-            .optimize = optimize,
-            .code_model = .kernel,
-            .unwind_tables = .sync,
-            .red_zone = false,
-            .link_libc = false,
-            .stack_check = false,
-            .stack_protector = false,
-            .link_libcpp = false,
-        }),
+        .root_module = kernel_module,
         .use_llvm = true,
+        .use_lld = true,
     });
 
     kernel.addLibraryPath(b.path("lib"));
     kernel.linkSystemLibrary("alloc");
     kernel.linkSystemLibrary("os_terminal");
-
     kernel.setLinkerScript(b.path("linker.ld"));
     kernel.lto = .none;
 

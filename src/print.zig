@@ -8,9 +8,6 @@ pub fn print(comptime format: []const u8, args: anytype) void {
     msg = std.fmt.bufPrint(&buf, format, args) catch @panic("[print.print] std.fmt.bufPrint seems to have failed, please make sure the message didn't contain more than 1024 characters!");
 
     terminal.print_str(msg);
-    for (msg) |c| {
-        terminal.global_serial.putchar(c);
-    }
 }
 
 pub fn println(comptime fmt: []const u8, args: anytype) void {

@@ -13,19 +13,26 @@ pub fn main() void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
     std.process.execv(allocator, &.{
-        "qemu-system-x86_64",
+        "qemu-system-loongarch64",
         "-m",
-        "512M",
+        "1G",
         "-drive",
-        "file=fat:rw:esp,format=raw",
+        "if=none,format=raw,id=disk,file=fat:rw:esp",
+        "-device",
+        "ahci,id=ahci0",
+        "-device",
+        "ide-hd,drive=disk,bus=ahci0.0",
         "-pflash",
         "ovmf-code.fd",
         "-net",
         "none",
         "-serial",
         "stdio",
-        "-enable-kvm",
         "-cpu",
-        "qemu64,+x2apic",
+        "la464",
+        "-machine",
+        "virt",
+        "-device",
+        "VGA,vgamem_mb=64",
     }) catch unreachable;
 }

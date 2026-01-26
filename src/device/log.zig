@@ -15,14 +15,7 @@ pub fn raca_log(
             return,
     } ++ "): ";
 
-    const color = switch (level) {
-        .err => "\x1b[31m",
-        .warn => "\x1b[33m",
-        .info => "\x1b[32m",
-        .debug => "\x1b[34m",
-    };
-
-    const prefix = "[" ++ color ++ comptime level.asText() ++ "\x1b[0m] " ++ scope_prefix;
+    const prefix = "[" ++ comptime level.asText() ++ scope_prefix;
 
     var buf: [1024]u8 = undefined;
     var msg: []const u8 = undefined;
@@ -30,8 +23,4 @@ pub fn raca_log(
     msg = std.fmt.bufPrint(&buf, prefix ++ format ++ "\n", args) catch @panic("[log.printf] std.fmt.bufPrint seems to have failed, please make sure the message didn't contain more than 1024 characters!");
 
     terminal.print_str(msg);
-
-    for (msg) |c| {
-        terminal.global_serial.putchar(c);
-    }
 }

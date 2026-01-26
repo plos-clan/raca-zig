@@ -9,12 +9,14 @@ pub const LimineArch = enum {
     x86_64,
     aarch64,
     riscv64,
+    loongarch64,
 };
 
 pub const arch = switch (builtin.cpu.arch) {
     .x86, .x86_64 => LimineArch.x86_64,
     .aarch64 => LimineArch.aarch64,
     .riscv64 => LimineArch.riscv64,
+    .loongarch64 => LimineArch.loongarch64,
     else => @compileError("Unsupported architecture: " ++ @tagName(builtin.cpu.arch)),
 };
 
