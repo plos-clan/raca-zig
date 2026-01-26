@@ -1,9 +1,7 @@
 const builtin = @import("builtin");
 const limine = @import("boot.zig").limine;
-const terminal = @import("device/terminal.zig");
-const log = @import("device/log.zig");
+const log = @import("log.zig");
 const std = @import("std");
-const print = @import("print.zig");
 
 pub const mem = @import("mem.zig");
 
@@ -30,7 +28,7 @@ export fn _start() callconv(.c) noreturn {
 
     mem.init();
 
-    terminal.init();
+    log.init();
 
     std.log.debug("Hello, world!", .{});
 
@@ -51,14 +49,14 @@ pub fn panic(msg: []const u8, stack_trace: ?*std.builtin.StackTrace, return_addr
             // if stack trace is delivered, we can loop over it
             std.log.info(" Stack Trace: ", .{});
             for (trace.*.instruction_addresses) |address| {
-                print.println(" 0x{x:0>16}", .{address});
+                log.println(" 0x{x:0>16}", .{address});
             }
         } else {
             // else, we will have to capture it via std.debug.StackIterator
             std.log.info("  Stack Trace: ", .{});
             var stack = std.debug.StackIterator.init(return_address orelse @returnAddress(), null);
             while (stack.next()) |address| {
-                print.println(" 0x{x:0>16}", .{address});
+                log.println(" 0x{x:0>16}", .{address});
             }
         }
     }

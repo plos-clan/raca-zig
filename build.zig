@@ -41,7 +41,6 @@ pub fn build(b: *std.Build) void {
 
     kernel.addLibraryPath(b.path("lib"));
     kernel.linkSystemLibrary("alloc");
-    kernel.linkSystemLibrary("os_terminal");
     kernel.setLinkerScript(b.path("linker.ld"));
     kernel.lto = .none;
 
