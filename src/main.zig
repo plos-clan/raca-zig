@@ -36,7 +36,11 @@ export fn _start() callconv(.c) noreturn {
 
 var already_panicking: bool = false;
 
-pub fn panic(msg: []const u8, stack_trace: ?*std.builtin.StackTrace, return_address: ?usize) noreturn {
+pub fn panic(
+    msg: []const u8,
+    stack_trace: ?*std.builtin.StackTrace,
+    return_address: ?usize,
+) noreturn {
     if (!already_panicking) {
         already_panicking = true;
         std.log.err("\n !!! Kernel Panic !!! ", .{});
@@ -48,7 +52,10 @@ pub fn panic(msg: []const u8, stack_trace: ?*std.builtin.StackTrace, return_addr
             }
         } else {
             std.log.info("  Stack Trace: ", .{});
-            var stack = std.debug.StackIterator.init(return_address orelse @returnAddress(), null);
+            var stack = std.debug.StackIterator.init(
+                return_address orelse @returnAddress(),
+                null,
+            );
             while (stack.next()) |address| {
                 log.println(" 0x{x:0>16}", .{address});
             }

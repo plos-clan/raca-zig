@@ -59,14 +59,28 @@ const AllocatorImpl = struct {
         };
     }
 
-    fn allocate_memory(ctx: *anyopaque, len: usize, ptr_align: std.mem.Alignment, ret_addr: usize) ?[*]u8 {
+    fn allocate_memory(
+        ctx: *anyopaque,
+        len: usize,
+        ptr_align: std.mem.Alignment,
+        ret_addr: usize,
+    ) ?[*]u8 {
         _ = ret_addr;
         _ = ctx;
-        const ptr = liballoc.aligned_alloc(std.math.pow(u64, 2, @intFromEnum(ptr_align)), len) orelse return null;
+        const ptr = liballoc.aligned_alloc(
+            std.math.pow(u64, 2, @intFromEnum(ptr_align)),
+            len,
+        ) orelse return null;
         return @ptrCast(ptr);
     }
 
-    fn resize(ctx: *anyopaque, buf: []u8, buf_align: std.mem.Alignment, new_len: usize, ret_addr: usize) bool {
+    fn resize(
+        ctx: *anyopaque,
+        buf: []u8,
+        buf_align: std.mem.Alignment,
+        new_len: usize,
+        ret_addr: usize,
+    ) bool {
         _ = ret_addr;
         _ = ctx;
         _ = buf_align;
@@ -75,14 +89,25 @@ const AllocatorImpl = struct {
         return false;
     }
 
-    fn free_memory(ctx: *anyopaque, buf: []u8, buf_align: std.mem.Alignment, ret_addr: usize) void {
+    fn free_memory(
+        ctx: *anyopaque,
+        buf: []u8,
+        buf_align: std.mem.Alignment,
+        ret_addr: usize,
+    ) void {
         _ = ret_addr;
         _ = ctx;
         _ = buf_align;
         liballoc.free(@ptrCast(buf));
     }
 
-    fn remap(ctx: *anyopaque, buf: []u8, buf_align: std.mem.Alignment, new_addr: usize, ret_addr: usize) ?[*]u8 {
+    fn remap(
+        ctx: *anyopaque,
+        buf: []u8,
+        buf_align: std.mem.Alignment,
+        new_addr: usize,
+        ret_addr: usize,
+    ) ?[*]u8 {
         _ = ret_addr;
         _ = ctx;
         _ = buf_align;
