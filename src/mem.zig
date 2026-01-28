@@ -4,8 +4,8 @@ const Allocator = @import("std").mem.Allocator;
 
 pub const c_alloc = KernelAlloc.c_alloc;
 
-pub export var mem_map_request: limine.MemoryMapRequest = .{};
-pub export var hhdm: limine.HhdmRequest = .{};
+pub export var mem_map_request: limine.MemoryMapRequest linksection(".limine_requests") = .{};
+pub export var hhdm: limine.HhdmRequest linksection(".limine_requests") = .{};
 
 pub var physical_offset: usize = undefined;
 
@@ -23,6 +23,7 @@ pub fn init() void {
     {
         const response = hhdm.response.?;
         physical_offset = @intCast(response.offset);
+        @import("std").log.debug("offset: 0x{x:0>16}", .{physical_offset});
     }
 
     const response = mem_map_request.response.?;

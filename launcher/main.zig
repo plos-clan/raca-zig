@@ -24,8 +24,6 @@ pub fn main() void {
         "ide-hd,drive=disk,bus=ahci0.0",
         "-pflash",
         "ovmf-code.fd",
-        "-net",
-        "none",
         "-serial",
         "stdio",
         "-cpu",
@@ -33,6 +31,6 @@ pub fn main() void {
         "-machine",
         "virt",
         "-device",
-        "VGA,vgamem_mb=64",
+        "ramfb",
     }) catch unreachable;
 }

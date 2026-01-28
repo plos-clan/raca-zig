@@ -507,7 +507,7 @@ pub const ModuleRequest = extern struct {
 
 pub const RsdpResponse = extern struct {
     revision: u64,
-    address: *anyopaque,
+    address: u64,
 };
 
 pub const RsdpRequest = extern struct {

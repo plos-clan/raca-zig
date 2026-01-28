@@ -2,10 +2,11 @@ const builtin = @import("builtin");
 const limine = @import("boot/limine.zig");
 const log = @import("log.zig");
 const std = @import("std");
+const acpi = @import("driver/acpi.zig");
+const mem = @import("mem.zig");
+const arch = @import("arch.zig");
 
-pub const mem = @import("mem.zig");
-
-pub export var base_revision: limine.BaseRevision = .{ .revision = 4 };
+export var base_revision: limine.BaseRevision linksection(".limine_requests") = .{ .revision = 4 };
 
 inline fn done() noreturn {
     while (true) {
@@ -28,6 +29,8 @@ export fn _start() callconv(.c) noreturn {
 
     log.init();
     mem.init();
+    arch.init();
+    acpi.init();
 
     std.log.debug("Hello, world!", .{});
 

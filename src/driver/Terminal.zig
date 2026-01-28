@@ -4,7 +4,7 @@ color: u32 = 0xFFFFFF,
 font: Font,
 buffer: Buffer,
 
-const font_data = @embedFile("terminal/VGA8.F16");
+const font_data = @embedFile("Terminal/VGA8.F16");
 
 pub fn init(buffer: Buffer, font: Font) @This() {
     return .{
